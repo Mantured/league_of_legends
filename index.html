@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Champion Cards with Vue.js and Axios</title>
+
+    <!-- Include Vue.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+
+    <!-- Include Bootstrap CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="app" class="container mt-5">
+      <h1>Champion Cards</h1>
+
+      <!-- Aggiungi il form per la selezione del ruolo e della difficoltà -->
+      <form class="mb-4">
+        <div class="form-group">
+          <label for="roleSelect">Select Role:</label>
+          <select v-model="selectedRole" class="form-control" id="roleSelect">
+            <option value="">All Roles</option>
+            <option v-for="role in roles" :key="role" :value="role">
+              {{ role }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="difficultySelect">Select Difficulty:</label>
+          <select
+            v-model="selectedDifficulty"
+            class="form-control"
+            id="difficultySelect"
+          >
+            <option value="">All Difficulties</option>
+            <option
+              v-for="difficulty in difficulties"
+              :key="difficulty"
+              :value="difficulty"
+            >
+              {{ difficulty }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="searchInput">Search:</label>
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="form-control"
+            id="searchInput"
+            placeholder="Enter champion name"
+          />
+        </div>
+
+        <button @click.prevent="showRandomChampion" class="btn btn-primary">
+          Show Random Champion
+        </button>
+      </form>
+      <div v-if="!showRandomChampionOnly">
+        <div class="row">
+          <div
+            v-for="champion in filteredChampions"
+            :key="champion.id"
+            class="col-md-4 mb-4"
+          >
+            <div class="card">
+              <img
+                :src="getImageUrl(champion.id)"
+                class="card-img-top"
+                alt="Champion Splash Image"
+              />
+              <div class="card-body">
+                <h5 class="card-title">{{ champion.name }}</h5>
+                <p class="card-text">Roles: {{ champion.tags.join(', ') }}</p>
+                <p class="card-text">
+                  Difficulty: {{ champion.info.difficulty }}
+                </p>
+                <a :href="getChampionUrl(champion.id)" class="btn btn-primary"
+                  >Learn More</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <div class="card">
+          <img
+            :src="getImageUrl(randomChampion.id)"
+            class="card-img-top"
+            alt="Champion Splash Image"
+          />
+          <div class="card-body">
+            <h5 class="card-title">{{ randomChampion.name }}</h5>
+            <p class="card-text">Roles: {{ randomChampion.tags.join(', ') }}</p>
+            <p class="card-text">
+              Difficulty: {{ randomChampion.info.difficulty }}
+            </p>
+            <a :href="getChampionUrl(randomChampion.id)" class="btn btn-primary"
+              >Learn More</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="js/main.js"></script>
+
+    <!-- Include Bootstrap JS and Popper.js CDN (required for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

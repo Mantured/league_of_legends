@@ -9,11 +9,15 @@ new Vue({
     difficulties: ["1", "2", "3", "4", "5"],
     randomChampion: null,
     showRandomChampionOnly: false,
+    currentPage: 1,
+    itemsPerPage: 12,
   },
   computed: {
     filteredChampions() {
       // Filtra i campioni in base al ruolo, alla difficoltà e alla ricerca
-      return this.champions.filter((champion) => {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      return this.champions.slice(startIndex, endIndex).filter((champion) => {
         const roleMatch =
           !this.selectedRole || champion.tags.includes(this.selectedRole);
         const difficultyMatch =
@@ -24,6 +28,9 @@ new Vue({
           champion.name.toLowerCase().includes(this.searchQuery.toLowerCase());
         return roleMatch && difficultyMatch && searchMatch;
       });
+    },
+    totalPages() {
+      return Math.ceil(this.champions.length / this.itemsPerPage);
     },
   },
   methods: {
@@ -68,6 +75,19 @@ new Vue({
       const randomIndex = Math.floor(Math.random() * this.champions.length);
       this.randomChampion = this.champions[randomIndex];
       this.showRandomChampionOnly = true;
+    },
+    goToPage(page) {
+      this.currentPage = page;
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
     },
   },
   mounted() {

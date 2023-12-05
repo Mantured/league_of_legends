@@ -111,6 +111,15 @@
           </div>
         </div>
       </div>
+      <div>
+        <button @click="prevPage" :disabled="currentPage === 1">
+          Previous
+        </button>
+        <span>{{ currentPage }} / {{ totalPages }}</span>
+        <button @click="nextPage" :disabled="currentPage === totalPages">
+          Next
+        </button>
+      </div>
     </div>
 
     <!-- Include Axios CDN -->

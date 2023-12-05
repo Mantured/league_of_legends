@@ -6,31 +6,24 @@ new Vue({
     selectedDifficulty: "",
     searchQuery: "",
     roles: [],
-    difficulties: ["1", "2", "3", "4", "5"],
+    difficulties: [],
     randomChampion: null,
-    showRandomChampionOnly: false,
-    currentPage: 1,
-    itemsPerPage: 12,
+    showRandomChamp: false,
   },
   computed: {
     filteredChampions() {
       // Filtra i campioni in base al ruolo, alla difficoltà e alla ricerca
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      return this.champions.slice(startIndex, endIndex).filter((champion) => {
+      return this.champions.filter((champion) => {
         const roleMatch =
           !this.selectedRole || champion.tags.includes(this.selectedRole);
         const difficultyMatch =
           !this.selectedDifficulty ||
-          champion.info.difficulty.toString() === this.selectedDifficulty;
+          champion.info.difficulty === parseInt(this.selectedDifficulty, 10);
         const searchMatch =
           !this.searchQuery ||
           champion.name.toLowerCase().includes(this.searchQuery.toLowerCase());
         return roleMatch && difficultyMatch && searchMatch;
       });
-    },
-    totalPages() {
-      return Math.ceil(this.champions.length / this.itemsPerPage);
     },
   },
   methods: {
@@ -44,18 +37,24 @@ new Vue({
     fetchChampionsData() {
       axios
         .get(
-          `https://ddragon.leagueoflegends.com/cdn/13.23.1/data/en_US/champion.json`
+          `https://ddragon.leagueoflegends.com/cdn/13.23.1/data/it_IT/champion.json`
         )
         .then((response) => {
           const championsData = response.data.data;
           for (const championKey in championsData) {
             const champion = championsData[championKey];
             this.champions.push({
+              version: champion.version,
               id: champion.id,
+              key: champion.key,
               name: champion.name,
+              title: champion.title,
+              blurb: champion.blurb,
               tags: champion.tags,
               info: champion.info,
               image: champion.image,
+              partype: champion.partype,
+              stats: champion.stats,
             });
 
             // Aggiungi ruoli all'array roles (senza duplicati)
@@ -64,6 +63,11 @@ new Vue({
                 this.roles.push(role);
               }
             });
+            for (const difficulty in champion.info) {
+              if (!this.difficulties.includes(champion.info[difficulty])) {
+                this.difficulties.push(champion.info[difficulty]);
+              }
+            }
           }
         })
         .catch((error) => {
@@ -71,22 +75,27 @@ new Vue({
         });
     },
     showRandomChampion() {
-      // Mostra un campione casuale
-      const randomIndex = Math.floor(Math.random() * this.champions.length);
-      this.randomChampion = this.champions[randomIndex];
-      this.showRandomChampionOnly = true;
-    },
-    goToPage(page) {
-      this.currentPage = page;
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
+      // Filtra i campioni in base al ruolo e alla difficoltà selezionati
+      const filteredChampions = this.champions.filter((champion) => {
+        const roleMatch =
+          !this.selectedRole || champion.tags.includes(this.selectedRole);
+        const difficultyMatch =
+          !this.selectedDifficulty ||
+          champion.info.difficulty === parseInt(this.selectedDifficulty, 10);
+        return roleMatch && difficultyMatch;
+      });
+
+      // Se ci sono campioni che soddisfano i criteri, seleziona un campione casuale
+      if (filteredChampions.length > 0) {
+        const randomIndex = Math.floor(
+          Math.random() * filteredChampions.length
+        );
+        this.randomChampion = filteredChampions[randomIndex];
+        this.showRandomChamp = true;
+      } else {
+        // Altrimenti, se non ci sono campioni che soddisfano i criteri, resetta il campione casuale
+        this.randomChampion = null;
+        this.showRandomChamp = false;
       }
     },
   },

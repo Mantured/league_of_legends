@@ -17,57 +17,58 @@
   </head>
 
   <body>
-    <div id="app" class="container mt-5">
+    <div id="app">
+      <header id="top_header"></header>
       <h1>Champion Cards</h1>
+      <main class="container-fluid p-5">
+        <!-- Aggiungi il form per la selezione del ruolo e della difficoltà -->
+        <form class="mb-4">
+          <div class="form-group">
+            <label for="roleSelect">Select Role:</label>
+            <select v-model="selectedRole" class="form-control" id="roleSelect">
+              <option value="">All Roles</option>
+              <option v-for="role in roles" :key="role" :value="role">
+                {{ role }}
+              </option>
+            </select>
+          </div>
 
-      <!-- Aggiungi il form per la selezione del ruolo e della difficoltà -->
-      <form class="mb-4">
-        <div class="form-group">
-          <label for="roleSelect">Select Role:</label>
-          <select v-model="selectedRole" class="form-control" id="roleSelect">
-            <option value="">All Roles</option>
-            <option v-for="role in roles" :key="role" :value="role">
-              {{ role }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="difficultySelect">Select Difficulty:</label>
-          <select
-            v-model="selectedDifficulty"
-            class="form-control"
-            id="difficultySelect"
-          >
-            <option value="">All Difficulties</option>
-            <option
-              v-for="difficulty in difficulties"
-              :key="difficulty"
-              :value="difficulty"
+          <div class="form-group">
+            <label for="difficultySelect">Select Difficulty:</label>
+            <select
+              v-model="selectedDifficulty"
+              class="form-control"
+              id="difficultySelect"
             >
-              {{ difficulty }}
-            </option>
-          </select>
-        </div>
+              <option value="">All Difficulties</option>
+              <option
+                v-for="difficulty in difficulties"
+                :key="difficulty"
+                :value="difficulty"
+              >
+                {{ difficulty }}
+              </option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="searchInput">Search:</label>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="form-control"
-            id="searchInput"
-            placeholder="Enter champion name"
-          />
-        </div>
+          <div class="form-group">
+            <label for="searchInput">Search:</label>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control"
+              id="searchInput"
+              placeholder="Enter champion name"
+            />
+          </div>
 
-        <button @click.prevent="showRandomChampion" class="btn btn-primary">
-          Show Random Champion
-        </button>
-      </form>
-      <div v-if="!showRandomChampionOnly">
+          <button @click.prevent="showRandomChampion" class="btn btn-primary">
+            Show Random Champion
+          </button>
+        </form>
         <div class="row">
           <div
+            v-if="!showRandomChamp"
             v-for="champion in filteredChampions"
             :key="champion.id"
             class="col-md-4 mb-4"
@@ -80,10 +81,18 @@
               />
               <div class="card-body">
                 <h5 class="card-title">{{ champion.name }}</h5>
+                <p class="card-text">Title: {{ champion.title }}</p>
                 <p class="card-text">Roles: {{ champion.tags.join(', ') }}</p>
                 <p class="card-text">
                   Difficulty: {{ champion.info.difficulty }}
                 </p>
+                <p class="card-text">{{ champion.blurb }}</p>
+                <h6 class="card-subtitle mb-2 text-muted">Stats:</h6>
+                <ul class="list-group">
+                  <li class="list-group-item">HP: {{ champion.stats.hp }}</li>
+                  <li class="list-group-item">MP: {{ champion.stats.mp }}</li>
+                  <!-- Aggiungi altri dettagli se necessario -->
+                </ul>
                 <a :href="getChampionUrl(champion.id)" class="btn btn-primary"
                   >Learn More</a
                 >
@@ -91,35 +100,72 @@
             </div>
           </div>
         </div>
-      </div>
-      <div v-else>
-        <div class="card">
-          <img
-            :src="getImageUrl(randomChampion.id)"
-            class="card-img-top"
-            alt="Champion Splash Image"
-          />
-          <div class="card-body">
-            <h5 class="card-title">{{ randomChampion.name }}</h5>
-            <p class="card-text">Roles: {{ randomChampion.tags.join(', ') }}</p>
-            <p class="card-text">
-              Difficulty: {{ randomChampion.info.difficulty }}
-            </p>
-            <a :href="getChampionUrl(randomChampion.id)" class="btn btn-primary"
-              >Learn More</a
-            >
+
+        <!-- Mostra solo il campione casuale -->
+        <div v-if="showRandomChamp" class="mt-4">
+          <h2>Random Champion</h2>
+          <div class="card">
+            <img
+              :src="getImageUrl(randomChampion.id)"
+              class="card-img-top"
+              alt="Champion Splash Image"
+            />
+            <div class="card-body">
+              <h5 class="card-title">{{ randomChampion.name }}</h5>
+              <p class="card-text">Title: {{ randomChampion.title }}</p>
+              <p class="card-text">
+                Roles: {{ randomChampion.tags.join(', ') }}
+              </p>
+              <p class="card-text">
+                Difficulty: {{ randomChampion.info.difficulty }}
+              </p>
+              <p class="card-text">{{ randomChampion.blurb }}</p>
+              <h6 class="card-subtitle mb-2 text-muted">Stats:</h6>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  HP: {{ randomChampion.stats.hp }}
+                </li>
+                <li class="list-group-item">
+                  MP: {{ randomChampion.stats.mp }}
+                </li>
+                <!-- Aggiungi altri dettagli se necessario -->
+              </ul>
+              <a
+                :href="getChampionUrl(randomChampion.id)"
+                class="btn btn-primary"
+                >Learn More</a
+              >
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        <button @click="prevPage" :disabled="currentPage === 1">
-          Previous
-        </button>
-        <span>{{ currentPage }} / {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="currentPage === totalPages">
-          Next
-        </button>
-      </div>
+
+        <!-- Paginazione -->
+        <!-- <nav v-if="filteredChampions.length > pageSize">
+          <ul class="pagination">
+            <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
+              <a class="page-link" href="#" @click.prevent="prevPage"
+                >Previous</a
+              >
+            </li>
+            <li
+              class="page-item"
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ 'active': currentPage === page }"
+            >
+              <a class="page-link" href="#" @click.prevent="currentPage = page"
+                >{{ page }}</a
+              >
+            </li>
+            <li
+              class="page-item"
+              :class="{ 'disabled': currentPage === totalPages }"
+            >
+              <a class="page-link" href="#" @click.prevent="nextPage">Next</a>
+            </li>
+          </ul>
+        </nav> -->
+      </main>
     </div>
 
     <!-- Include Axios CDN -->
